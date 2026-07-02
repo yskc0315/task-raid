@@ -1,6 +1,12 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
+
+class Task(BaseModel):
+    title: str
+
+tasks = []
 
 @app.get("/")
 def hello():
@@ -8,15 +14,12 @@ def hello():
 
 @app.get("/tasks")
 def get_tasks():
-    return [
-        {
-            "id": 1,
-            "title": "FastAPIを学ぶ",
-            "completed": False
-        },
-        {
-            "id": 2,
-            "title": "Task Raidを作る",
-            "completed": True
-        }
-    ]
+    return tasks
+
+@app.post("/tasks")
+def create_task(task: Task):
+    tasks.append(task)
+    return {
+        "message": "Task created",
+        "task": task
+    }
