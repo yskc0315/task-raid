@@ -3,8 +3,16 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class Task(BaseModel):
+class TaskCreate(BaseModel):
     title: str
+    difficulty: int
+
+class Task(BaseModel):
+    id: int
+    title: str
+    difficulty: int
+    completed: bool
+    exp: int
 
 tasks = []
 
@@ -17,9 +25,16 @@ def get_tasks():
     return tasks
 
 @app.post("/tasks")
-def create_task(task: Task):
-    tasks.append(task)
-    return {
-        "message": "Task created",
-        "task": task
-    }
+def create_task(task: TaskCreate):
+
+    new_task = Task(
+        id = len(tasks) + 1,
+        title = task.title,
+        difficulty = task.difficulty,
+        completed = False,
+        exp = task.difficulty * 100
+    )
+
+    tasks.append(new_task)
+
+    return new_task
