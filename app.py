@@ -49,3 +49,11 @@ def update_task(task_id: int, update: TaskUpdate):
             task.completed = update.completed
             return task
     return {"message": "Task not found"}
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int):
+    for task in tasks:
+        if task.id == task_id:
+            tasks.remove(task)
+            return {"message": "Task deleted"}
+    return {"message": "Task not found"}
