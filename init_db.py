@@ -1,5 +1,9 @@
+import sys
+
+print(sys.path)
+
 from database import engine
 from models import Base
 
 # テーブル作成用クラス
-Base.metadata.create_all(binde=engine)
+Base.metadata.create_all(bind=engine)
