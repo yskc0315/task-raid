@@ -1,59 +1,38 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+
+from database import get_db
+from models import Task
+from schemas import TaskCreate, TaskUpdate, TaskResponse
+
+import crud
 
 app = FastAPI()
 
-class TaskCreate(BaseModel):
-    title: str
-    difficulty: int
-
-class TaskUpdate(BaseModel):
-    completed: bool
-
-class Task(BaseModel):
-    id: int
-    title: str
-    difficulty: int
-    completed: bool
-    exp: int
-
 tasks = []
 
-@app.get("/")
-def hello():
-    return {"message": "Hello Task Raid!"}
+@app.get("/tasks", response_model=list[TaskResponse])
+def get_tasks(db: Session = Depends(get_db)):
+    return crud.get_tasks(db)
 
-@app.get("/tasks")
-def get_tasks():
-    return tasks
+@app.post("/tasks", response_model=TaskResponse)
+def create_task(task: TaskCreate, db:Session = Depends(get_db)):
+    return crud.create_task(db, task)
 
-@app.post("/tasks")
-def create_task(task: TaskCreate):
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, update: TaskUpdate, db: Session = Depends(get_db)):
+    task = crud.update_task(db, task_id, update)
 
-    new_task = Task(
-        id = len(tasks) + 1,
-        title = task.title,
-        difficulty = task.difficulty,
-        completed = False,
-        exp = task.difficulty * 100
-    )
+    if task is None:
+        return {"message": "Task not found"}
 
-    tasks.append(new_task)
+    return task
 
-    return new_task
+@app.delete("/tasks/{task_id}", response_model=TaskResponse)
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    task = crud.delete_task(db, task_id)
 
-@app.put("/tasks/{task_id}")
-def update_task(task_id: int, update: TaskUpdate):
-    for task in tasks:
-        if task.id == task_id:
-            task.completed = update.completed
-            return task
-    return {"message": "Task not found"}
-
-@app.delete("/tasks/{task_id}")
-def delete_task(task_id: int):
-    for task in tasks:
-        if task.id == task_id:
-            tasks.remove(task)
-            return {"message": "Task deleted"}
-    return {"message": "Task not found"}
+    if task is None:
+        return {"message": "Task not found"}
+    
+    return task

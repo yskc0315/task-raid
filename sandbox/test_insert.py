@@ -4,10 +4,10 @@ from models import Task
 db = SessionLocal()
 
 task = Task(
-    title = "SQLAlchemyの勉強",
-    difficulty = 3,
+    title = "Pythonの勉強",
+    difficulty = 5,
     completed = False,
-    exp = 100
+    exp = 500
 )
 
 db.add(task)
